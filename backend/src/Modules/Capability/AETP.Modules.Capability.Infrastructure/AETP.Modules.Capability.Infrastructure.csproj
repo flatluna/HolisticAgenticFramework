@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Capability.Infrastructure</AssemblyName>
+    <RootNamespace>AETP.Modules.Capability.Infrastructure</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Capability.Application\AETP.Modules.Capability.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\AETP.BuildingBlocks.Infrastructure\AETP.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

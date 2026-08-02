@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Capability.Api</AssemblyName>
+    <RootNamespace>AETP.Modules.Capability.Api</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Capability.Application\AETP.Modules.Capability.Application.csproj" />
+  </ItemGroup>
+</Project>

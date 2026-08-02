@@ -1,0 +1,36 @@
+name: CI - Backend
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-backend.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore backend
+      
+      - name: Build
+        run: dotnet build backend --configuration Release --no-restore
+      
+      - name: Run tests
+        run: dotnet test backend --configuration Release --no-build --verbosity normal
+      
+      - name: Check code style
+        run: dotnet build backend --configuration Release /p:EnforceCodeStyleInBuild=true

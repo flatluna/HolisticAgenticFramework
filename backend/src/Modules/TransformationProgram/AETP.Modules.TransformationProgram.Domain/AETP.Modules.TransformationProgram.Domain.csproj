@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.TransformationProgram.Domain</AssemblyName>
+    <RootNamespace>AETP.Modules.TransformationProgram.Domain</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\AETP.BuildingBlocks.Domain\AETP.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+</Project>

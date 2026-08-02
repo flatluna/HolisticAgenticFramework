@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Decision.Infrastructure</AssemblyName>
+    <RootNamespace>AETP.Modules.Decision.Infrastructure</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Decision.Application\AETP.Modules.Decision.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\AETP.BuildingBlocks.Infrastructure\AETP.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.ClientEngagement.Api</AssemblyName>
+    <RootNamespace>AETP.Modules.ClientEngagement.Api</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+    <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.9.0-beta.1" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.19.0" />
+    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.13.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.7" OutputItemType="Analyzer" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.ClientEngagement.Infrastructure\AETP.Modules.ClientEngagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\AETP.Modules.ClientEngagement.Application\AETP.Modules.ClientEngagement.Application.csproj" />
+    <ProjectReference Include="..\..\Capability\AETP.Modules.Capability.Infrastructure\AETP.Modules.Capability.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Process\AETP.Modules.Process.Infrastructure\AETP.Modules.Process.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Decision\AETP.Modules.Decision.Infrastructure\AETP.Modules.Decision.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

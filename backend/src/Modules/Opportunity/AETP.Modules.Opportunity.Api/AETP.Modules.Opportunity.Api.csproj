@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Opportunity.Api</AssemblyName>
+    <RootNamespace>AETP.Modules.Opportunity.Api</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Opportunity.Application\AETP.Modules.Opportunity.Application.csproj" />
+  </ItemGroup>
+</Project>

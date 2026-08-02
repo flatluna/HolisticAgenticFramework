@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Capability.Application</AssemblyName>
+    <RootNamespace>AETP.Modules.Capability.Application</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Capability.Domain\AETP.Modules.Capability.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\AETP.BuildingBlocks.Application\AETP.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>

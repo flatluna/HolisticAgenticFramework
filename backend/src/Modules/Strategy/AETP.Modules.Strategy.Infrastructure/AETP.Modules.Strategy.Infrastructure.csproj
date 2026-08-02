@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Strategy.Infrastructure</AssemblyName>
+    <RootNamespace>AETP.Modules.Strategy.Infrastructure</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Strategy.Application\AETP.Modules.Strategy.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\AETP.BuildingBlocks.Infrastructure\AETP.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

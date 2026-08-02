@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.BuildingBlocks.EventBus</AssemblyName>
+    <RootNamespace>AETP.BuildingBlocks.EventBus</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.BuildingBlocks.Domain\AETP.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+</Project>

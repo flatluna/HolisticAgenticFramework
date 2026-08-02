@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.Decision.Application</AssemblyName>
+    <RootNamespace>AETP.Modules.Decision.Application</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.Decision.Domain\AETP.Modules.Decision.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\AETP.BuildingBlocks.Application\AETP.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>

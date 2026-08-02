@@ -1,0 +1,54 @@
+# Backend
+**/bin/
+**/obj/
+backend/.vs/
+backend/.vscode/
+backend/*.user
+backend/.localhistory/
+backend/local.settings.json
+backend/**/local.settings.json
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Azure Functions / Azurite local storage emulator
+.azurite/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+~$*
+
+# User secrets
+**/Properties/launchSettings.json
+**/userprofile.json
+
+# Database
+*.mdf
+*.ldf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# .NET
+.dotnet/
+
+# Environment files
+.env
+.env.local

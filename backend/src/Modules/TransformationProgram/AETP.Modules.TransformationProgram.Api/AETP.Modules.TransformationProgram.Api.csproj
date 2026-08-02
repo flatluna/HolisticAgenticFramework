@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AETP.Modules.TransformationProgram.Api</AssemblyName>
+    <RootNamespace>AETP.Modules.TransformationProgram.Api</RootNamespace>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AETP.Modules.TransformationProgram.Application\AETP.Modules.TransformationProgram.Application.csproj" />
+  </ItemGroup>
+</Project>
