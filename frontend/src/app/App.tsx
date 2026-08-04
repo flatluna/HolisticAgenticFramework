@@ -9,6 +9,11 @@ import { MandatoPage } from '@/modules/strategy/pages/MandatoPage'
 import { BusinessStrategyPage } from '@/modules/strategy/pages/BusinessStrategyPage'
 import { MadurezOverviewPage } from '@/modules/madurez/pages/MadurezOverviewPage'
 import { DomainDiscoveryPage } from '@/modules/domains/pages/DomainDiscoveryPage'
+import { ProcessDeepDivePage } from '@/modules/deepdive/pages/ProcessDeepDivePage'
+import { ProcessOverviewPage } from '@/modules/deepdive/pages/ProcessOverviewPage'
+import { StepCapturePage } from '@/modules/deepdive/pages/StepCapturePage'
+import { SystemsCatalogPage } from '@/modules/deepdive/pages/SystemsCatalogPage'
+import { DataDictionaryPage } from '@/modules/datadictionary/pages/DataDictionaryPage'
 import { PlaceholderPage } from '@/shared/components/PlaceholderPage'
 import { StepPlaceholderPage } from '@/shared/components/StepPlaceholderPage'
 import { PhaseOverviewPage } from '@/shared/components/PhaseOverviewPage'
@@ -19,11 +24,12 @@ import { phases } from '@/layout/phaseData'
 // Every step path other than the index ('/') gets a generic step page so
 // every node in the pipeline can be opened and reviewed, even before its
 // dedicated UI is built. '/madurez' (Paso 1 · Assessment de Preparación
-// Organizacional) and '/dominios' (Paso 2 · Descubrimiento y Priorización de
-// Dominios de Negocio) have their own dedicated pages so they're excluded here.
+// Organizacional), '/dominios' (Paso 2 · Descubrimiento y Priorización de
+// Dominios de Negocio) and '/deep-dive' (Paso 3 · Deep Dive de Procesos)
+// have their own dedicated pages so they're excluded here.
 const otherStepPaths = phases
   .flatMap((phase) => phase.steps.map((step) => step.path))
-  .filter((path) => path !== '/' && path !== '/madurez' && path !== '/dominios')
+  .filter((path) => path !== '/' && path !== '/madurez' && path !== '/dominios' && path !== '/deep-dive')
 
 // Simulación de sesión: si aún no se ha "iniciado sesión" en esta pestaña,
 // cualquier ruta dentro del panel redirige al login.
@@ -55,6 +61,9 @@ function App() {
             <Route path="fundamento/business-strategy" element={<BusinessStrategyPage />} />
             <Route path="madurez" element={<MadurezOverviewPage />} />
             <Route path="dominios" element={<DomainDiscoveryPage />} />
+            <Route path="deep-dive" element={<ProcessDeepDivePage />} />
+            <Route path="deep-dive/:processId" element={<ProcessOverviewPage />} />
+            <Route path="deep-dive/:processId/paso/:stepId" element={<StepCapturePage />} />
             {otherStepPaths.map((path) => (
               <Route key={path} path={path.slice(1)} element={<StepPlaceholderPage />} />
             ))}
@@ -63,6 +72,8 @@ function App() {
             <Route path="trazabilidad" element={<PlaceholderPage title="Trazabilidad" />} />
             <Route path="entregables" element={<PlaceholderPage title="Entregables" />} />
             <Route path="decisiones" element={<PlaceholderPage title="Decisiones" />} />
+            <Route path="diccionario-datos" element={<DataDictionaryPage />} />
+            <Route path="catalogo-sistemas" element={<SystemsCatalogPage />} />
           </Route>
         </Routes>
       </Router>

@@ -74,6 +74,24 @@ export const phases: Phase[] = [
       },
     ],
   },
+  {
+    id: 'h2',
+    code: 'L3',
+    label: 'Deep Dive de Procesos',
+    steps: [
+      {
+        id: 'h2-01',
+        code: '00',
+        label: 'Deep Dive de Procesos',
+        deliverable: 'Documentación paso a paso de cada proceso priorizado en L2',
+        status: 'pending',
+        path: '/deep-dive',
+      },
+    ],
+    // El conteo "x/1 pasos" en el sidebar ya refleja este único step; en
+    // cuanto exista un step por proceso priorizado (uno por cada fila de la
+    // lista en ProcessDeepDivePage), agrégalo aquí y el contador se ajusta solo.
+  },
 ]
 
 export interface FlatNavItem {
@@ -86,5 +104,7 @@ export const flatNavItems: FlatNavItem[] = [
   { id: 'trazabilidad', label: 'Trazabilidad', path: '/trazabilidad' },
   { id: 'entregables', label: 'Entregables', path: '/entregables' },
   { id: 'decisiones', label: 'Decisiones', path: '/decisiones' },
+  { id: 'diccionario-datos', label: 'Diccionario de Datos', path: '/diccionario-datos' },
+  { id: 'catalogo-sistemas', label: 'Catálogo de Sistemas', path: '/catalogo-sistemas' },
   { id: 'administracion', label: 'Administración', path: '/admin' },
 ]

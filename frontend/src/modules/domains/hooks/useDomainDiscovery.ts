@@ -407,7 +407,7 @@ export const useDomainDiscovery = () => {
   )
 
   const saveNow = useCallback(async () => {
-    if (!engagementId) return
+    if (!engagementId) return false
     if (debounceRef.current) clearTimeout(debounceRef.current)
     setSaving(true)
     try {
@@ -420,8 +420,10 @@ export const useDomainDiscovery = () => {
         saveDomainAssessments(engagementId, requests),
       ])
       setUpdatedAt(new Date().toISOString())
+      return true
     } catch (err) {
       console.error('Error guardando el descubrimiento de dominios de negocio', err)
+      return false
     } finally {
       setSaving(false)
     }

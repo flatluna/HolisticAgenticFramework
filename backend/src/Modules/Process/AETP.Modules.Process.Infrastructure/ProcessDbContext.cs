@@ -11,6 +11,8 @@ namespace AETP.Modules.Process.Infrastructure
         public DbSet<AgentReadinessAssessment> AgentReadinessAssessments { get; set; } = null!;
         public DbSet<BusinessDomain> BusinessDomains { get; set; } = null!;
         public DbSet<EnterpriseSystem> EnterpriseSystems { get; set; } = null!;
+        public DbSet<EnterpriseSystemModule> EnterpriseSystemModules { get; set; } = null!;
+        public DbSet<EnterpriseSystemTransaction> EnterpriseSystemTransactions { get; set; } = null!;
         public DbSet<ProcessDependency> ProcessDependencies { get; set; } = null!;
         public DbSet<ProcessSystem> ProcessSystems { get; set; } = null!;
         public DbSet<RoleCategory> RoleCategories { get; set; } = null!;
@@ -28,6 +30,8 @@ namespace AETP.Modules.Process.Infrastructure
         public DbSet<ActivityInteraction> ActivityInteractions { get; set; } = null!;
         public DbSet<ActivityDependency> ActivityDependencies { get; set; } = null!;
         public DbSet<ProcessGapFinding> ProcessGapFindings { get; set; } = null!;
+        public DbSet<DocumentExtraction> DocumentExtractions { get; set; } = null!;
+        public DbSet<DataDictionaryEntry> DataDictionaryEntries { get; set; } = null!;
 
         public ProcessDbContext(DbContextOptions<ProcessDbContext> options)
             : base(options)
@@ -119,8 +123,44 @@ namespace AETP.Modules.Process.Infrastructure
                 entity.Property(e => e.Category).HasMaxLength(100);
                 entity.Property(e => e.Description).HasMaxLength(1000);
                 entity.Property(e => e.Status).HasMaxLength(20).HasDefaultValue("Activo");
+                entity.Property(e => e.EsSuite).HasDefaultValue(false);
+                entity.Property(e => e.TieneAPI).HasDefaultValue(false);
+                entity.Property(e => e.TipoAPI).HasMaxLength(100);
+                entity.Property(e => e.NotasAPI).HasMaxLength(1000);
+                entity.Property(e => e.Hosting).HasConversion<string>().HasMaxLength(20);
+                entity.Property(e => e.ProveedorNube).HasMaxLength(100);
+                entity.Property(e => e.NotasHosting).HasMaxLength(1000);
 
                 entity.HasIndex(e => new { e.EngagementId, e.Name }).IsUnique();
+            });
+
+            modelBuilder.Entity<EnterpriseSystemModule>(entity =>
+            {
+                entity.ToTable("EnterpriseSystemModules");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+
+                entity.HasIndex(e => e.SystemId);
+
+                entity.HasOne<EnterpriseSystem>()
+                    .WithMany()
+                    .HasForeignKey(e => e.SystemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<EnterpriseSystemTransaction>(entity =>
+            {
+                entity.ToTable("EnterpriseSystemTransactions");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Codigo).HasMaxLength(50);
+                entity.Property(e => e.Nombre).HasMaxLength(200);
+
+                entity.HasIndex(e => e.SystemId);
+
+                entity.HasOne<EnterpriseSystem>()
+                    .WithMany()
+                    .HasForeignKey(e => e.SystemId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ProcessDependency>(entity =>
@@ -454,6 +494,62 @@ namespace AETP.Modules.Process.Infrastructure
                     .WithMany()
                     .HasForeignKey(e => e.ActivityId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ================= Document Extraction Agent =================
+
+            modelBuilder.Entity<DocumentExtraction>(entity =>
+            {
+                entity.ToTable("DocumentExtractions");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FileName).IsRequired().HasMaxLength(300);
+                entity.Property(e => e.ContentType).HasMaxLength(150);
+                entity.Property(e => e.BlobPath).HasMaxLength(500);
+                entity.Property(e => e.DocumentFormat).HasMaxLength(50);
+                entity.Property(e => e.Author).HasMaxLength(300);
+                entity.Property(e => e.DetectedLanguage).HasMaxLength(50);
+                entity.Property(e => e.ExtractedDataJson).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.EntitiesJson).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.ContentDescription).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.ExecutiveSummary).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.ExtractionStatus).HasMaxLength(20).HasDefaultValue("Subido");
+                entity.Property(e => e.ExtractionError).HasMaxLength(2000);
+                entity.Property(e => e.ExtractionModel).HasMaxLength(100);
+
+                entity.HasIndex(e => e.ProcessId);
+                entity.HasIndex(e => e.ActivityId);
+                entity.HasIndex(e => e.SourceId);
+
+                entity.HasOne<ProcessActivity>()
+                    .WithMany()
+                    .HasForeignKey(e => e.ActivityId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<ActivityInteraction>()
+                    .WithMany()
+                    .HasForeignKey(e => e.SourceId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ================= Data Dictionary =================
+
+            modelBuilder.Entity<DataDictionaryEntry>(entity =>
+            {
+                entity.ToTable("DataDictionaryEntries");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.OfficialName).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Context).HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(2000);
+                entity.Property(e => e.TechnicalName).HasMaxLength(200);
+                entity.Property(e => e.DataType).HasMaxLength(30);
+                entity.Property(e => e.Format).HasMaxLength(500);
+                entity.Property(e => e.Owner).HasMaxLength(200);
+                entity.Property(e => e.QualityOwner).HasMaxLength(200);
+                entity.Property(e => e.SynonymsJson).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.RepresentationsJson).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.GlobalRulesJson).HasColumnType("nvarchar(max)");
+
+                entity.HasIndex(e => new { e.EngagementId, e.OfficialName, e.Context });
             });
         }
     }

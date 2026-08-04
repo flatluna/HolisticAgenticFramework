@@ -78,7 +78,7 @@ namespace AETP.Modules.ClientEngagement.Api.Functions
                     .OrderBy(s => s.Name)
                     .ToListAsync();
 
-                return new OkObjectResult(systems.Select(MapToDto));
+                return new OkObjectResult(await EnterpriseSystemMapper.MapManyAsync(_dbContext, systems));
             }
             catch (Exception ex)
             {
@@ -95,16 +95,6 @@ namespace AETP.Modules.ClientEngagement.Api.Functions
             RoleCategoryId = r.RoleCategoryId,
             Description = r.Description,
             Status = r.Status
-        };
-
-        private static EnterpriseSystemDto MapToDto(EnterpriseSystem s) => new()
-        {
-            Id = s.Id,
-            EngagementId = s.EngagementId,
-            Name = s.Name,
-            Category = s.Category,
-            Description = s.Description,
-            Status = s.Status
         };
     }
 }

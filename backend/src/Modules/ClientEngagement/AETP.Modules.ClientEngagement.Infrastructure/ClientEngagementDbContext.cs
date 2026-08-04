@@ -17,6 +17,7 @@ namespace AETP.Modules.ClientEngagement.Infrastructure
         public DbSet<OrganizationalReadinessPillar> OrganizationalReadinessPillars { get; set; } = null!;
         public DbSet<DomainDiscoverySettings> DomainDiscoverySettings { get; set; } = null!;
         public DbSet<DomainAssessment> DomainAssessments { get; set; } = null!;
+        public DbSet<SapFieldEnrichment> SapFieldEnrichments { get; set; } = null!;
 
         public ClientEngagementDbContext(DbContextOptions<ClientEngagementDbContext> options)
             : base(options)
@@ -247,6 +248,24 @@ namespace AETP.Modules.ClientEngagement.Infrastructure
                 entity.Property(e => e.ProcessInventoryJson).HasColumnType("nvarchar(max)");
                 entity.Property(e => e.SystemsInventoryJson).HasColumnType("nvarchar(max)");
                 entity.HasIndex(e => new { e.EngagementId, e.DomainId }).IsUnique();
+            });
+
+            // SapFieldEnrichment — caché del Agente de Enriquecimiento de
+            // Campos SAP. EngagementId = Guid.Empty para campos estándar
+            // (caché GLOBAL); EngagementId = engagement real solo para
+            // campos custom Z* (ver SapFieldEnrichment.Create). El índice
+            // único (EngagementId, FieldName) es la clave de caché real.
+            modelBuilder.Entity<SapFieldEnrichment>(entity =>
+            {
+                entity.ToTable("SapFieldEnrichments");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FieldName).IsRequired().HasMaxLength(60);
+                entity.Property(e => e.Descripcion).HasMaxLength(2000);
+                entity.Property(e => e.Formato).HasMaxLength(500);
+                entity.Property(e => e.ReglaNegocio).HasMaxLength(2000);
+                entity.Property(e => e.FuenteGrounding).HasMaxLength(1000);
+                entity.Property(e => e.SapVersion).HasMaxLength(50);
+                entity.HasIndex(e => new { e.EngagementId, e.FieldName }).IsUnique();
             });
         }
     }

@@ -10,9 +10,9 @@ import {
   IconButton,
   MenuItem,
   Select,
+  Snackbar,
   Tab,
   Tabs,
-  ThemeProvider,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
@@ -26,7 +26,6 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { useNavigate } from 'react-router-dom'
 import { phases } from '@/layout/phaseData'
 import { useEmpresaActiva } from '@/shared/hooks/useEmpresaActiva'
-import { readinessTheme } from '@/modules/madurez/assessmentTheme'
 import { INDUSTRIES } from '../data/industriesData'
 import { useDomainDiscovery } from '../hooks/useDomainDiscovery'
 import { DomainCard } from '../components/DomainCard'
@@ -79,6 +78,7 @@ export const DomainDiscoveryPage = () => {
   const [matrixGranularity, setMatrixGranularity] = useState<'process' | 'domain'>('process')
   const [businessCaseGranularity, setBusinessCaseGranularity] = useState<'process' | 'domain'>('process')
   const [showMethodologyNote, setShowMethodologyNote] = useState(true)
+  const [saveFeedback, setSaveFeedback] = useState<'success' | 'error' | null>(null)
   const [activeDomainId, setActiveDomainId] = useState<string | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [drawerRect, setDrawerRect] = useState<DrawerRect | null>(null)
@@ -122,8 +122,13 @@ export const DomainDiscoveryPage = () => {
     navigate(nextGlobalStepPath ?? '/fase/h1')
   }
 
+  const handleSaveClick = async () => {
+    const ok = await saveNow()
+    setSaveFeedback(ok ? 'success' : 'error')
+  }
+
   return (
-    <ThemeProvider theme={readinessTheme}>
+    <>
       <Box sx={{ minHeight: '100%', bgcolor: 'background.default', color: 'text.primary' }}>
         <Box sx={{ px: 3, pt: 2 }}>
           <Breadcrumbs
@@ -194,8 +199,13 @@ export const DomainDiscoveryPage = () => {
               {evaluatedCount}/{domains.length} dominios · {lastSavedLabel}
             </Typography>
 
-            <Button variant="outlined" startIcon={<SaveRoundedIcon />} onClick={saveNow} disabled={saving || !hasEngagement}>
-              Guardar
+            <Button
+              variant="outlined"
+              startIcon={<SaveRoundedIcon />}
+              onClick={handleSaveClick}
+              disabled={saving || !hasEngagement}
+            >
+              {saving ? 'Guardando…' : 'Guardar'}
             </Button>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.4 }}>
               <Button
@@ -372,6 +382,24 @@ export const DomainDiscoveryPage = () => {
             : undefined
         }
       />
-    </ThemeProvider>
+
+      <Snackbar
+        open={saveFeedback !== null}
+        autoHideDuration={3000}
+        onClose={() => setSaveFeedback(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSaveFeedback(null)}
+          severity={saveFeedback === 'error' ? 'error' : 'success'}
+          variant="filled"
+          sx={{ boxShadow: 4 }}
+        >
+          {saveFeedback === 'error'
+            ? 'No se pudo guardar — revisa tu conexión e intenta de nuevo.'
+            : 'Cambios guardados correctamente.'}
+        </Alert>
+      </Snackbar>
+    </>
   )
 }

@@ -631,6 +631,64 @@ namespace AETP.Modules.ClientEngagement.Infrastructure.Migrations
                     b.ToTable("OrganizationalReadinessPillars", "engagement");
                 });
 
+            modelBuilder.Entity("AETP.Modules.ClientEngagement.Domain.SapFieldEnrichment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("EncontradoEnGrounding")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("EngagementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FieldName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("Formato")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FuenteGrounding")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsCustomField")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReglaNegocio")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("SapVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EngagementId", "FieldName")
+                        .IsUnique();
+
+                    b.ToTable("SapFieldEnrichments", "engagement");
+                });
+
             modelBuilder.Entity("AETP.Modules.ClientEngagement.Domain.Stakeholder", b =>
                 {
                     b.Property<Guid>("Id")

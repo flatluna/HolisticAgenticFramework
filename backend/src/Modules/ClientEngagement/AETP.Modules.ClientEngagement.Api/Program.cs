@@ -108,6 +108,20 @@ namespace AETP.Modules.ClientEngagement.Api
                     // (isolated worker's channel to the host silently died mid-call).
                     services.AddSingleton<ProcessDocumentExtractionOrchestrator>();
 
+                    // DocumentExtractionAgent — reads an UNSTRUCTURED source
+                    // document (📄, e.g. a credit report PDF attached to an
+                    // email) that arrived as a 📥 Fuente (ActivityInteraction)
+                    // within a 🪜 Paso (ProcessActivity), and produces the 6
+                    // structured blocks (metadatos, datos clave tipados,
+                    // entidades NER, descripción, total de páginas, sumario
+                    // ejecutivo) — reuses PdfTextExtractor/PdfImageDescriptionAgent
+                    // and ProcessDocumentStorageService above; only ADDS a new
+                    // agent + orchestrator with a different structured-output
+                    // shape and its own DocumentExtractions table for full
+                    // Proceso/Paso/Fuente/Empresa traceability.
+                    services.AddSingleton<DocumentExtractionAgent>();
+                    services.AddSingleton<DocumentExtractionOrchestrator>();
+
                     // Agent-Readiness assessment (Paso 2.3 Procesos, upload PDF) —
                     // "Agent-Readiness Process Architect" agent that produces a full
                     // process model, ontology, governance and 8-dimension assessment
@@ -117,6 +131,52 @@ namespace AETP.Modules.ClientEngagement.Api
                     // as ProcessDocumentExtractionOrchestrator above.
                     services.AddSingleton<AgentReadinessExtractionAgent>();
                     services.AddSingleton<AgentReadinessExtractionOrchestrator>();
+
+                    // Diccionario de Datos — "✨ Sugerir con IA" en "Crear nuevo dato":
+                    // propone nombre/tipo/PII/dueño/sistemas/reglas de negocio para un
+                    // dato a partir de una descripción corta, fundamentando referencias
+                    // legales y mejores prácticas con una búsqueda real de Bing
+                    // (Grounding with Bing Search) — a diferencia del resto de agentes
+                    // de este módulo, corre sobre un Azure AI Foundry PROJECT
+                    // (Azure.AI.Projects + Microsoft.Agents.AI.Foundry) reutilizando
+                    // infraestructura YA EXISTENTE (proyecto "twinet" + conexión Bing
+                    // "twinbing"), sin aprovisionar nada nuevo. Solo una propuesta —
+                    // el humano siempre revisa/edita antes de guardar.
+                    services.AddSingleton<DataDictionarySuggestionAgent>();
+
+                    // 🎯 Agente de Enriquecimiento de Campos SAP — en
+                    // http://localhost:3000/deep-dive/p1/paso/nuevo, cuando el
+                    // asesor captura "🖥 Ubicación exacta en el sistema" con
+                    // sistema=SAP, propone descripción/formato/regla de negocio
+                    // para el "Nombre técnico del campo" (ej. KLIMK, CTLPC,
+                    // ZCREDLIMIT), fundamentado en Bing Grounding. MISMO patrón
+                    // Azure AI Foundry + Bing que DataDictionarySuggestionAgent
+                    // (misma infraestructura reutilizada, nada nuevo aprovisionado).
+                    // Los resultados se cachean en SQL por
+                    // SapFieldEnrichmentFunctions (no en este singleton).
+                    services.AddSingleton<SapFieldEnrichmentAgent>();
+
+                    // 📸 "Extraer campos desde captura de pantalla" — en la
+                    // Etapa ③ (Datos procesados) de
+                    // http://localhost:3000/deep-dive/p1/paso/nuevo, cuando el
+                    // tipo de acción es Sistema/Aplicación, el asesor sube una
+                    // captura de pantalla (SAP u otro sistema) y este flujo de
+                    // dos agentes propone TODOS los campos visibles: (1)
+                    // SystemScreenshotExtractionAgent los lee con visión
+                    // (Azure OpenAI directo, mismo patrón que
+                    // OrgChartExtractionAgent) y (2) SystemFieldGroundingAgent
+                    // investiga cada uno con Bing Grounding (mismo patrón
+                    // Azure AI Foundry que SapFieldEnrichmentAgent,
+                    // generalizado a cualquier sistema, no solo SAP). Corre
+                    // en BACKGROUND vía su propio orquestador (mismo motivo
+                    // que ProcessDocumentExtractionOrchestrator arriba: evitar
+                    // el bug de "zombie Functions host"). Nunca expone/pide el
+                    // valor realmente capturado en un campo — solo su nombre y
+                    // estructura. Siempre una propuesta para aceptar/rechazar
+                    // campo por campo.
+                    services.AddSingleton<SystemScreenshotExtractionAgent>();
+                    services.AddSingleton<SystemFieldGroundingAgent>();
+                    services.AddSingleton<SystemScreenshotExtractionOrchestrator>();
                 })
                 .Build();
 

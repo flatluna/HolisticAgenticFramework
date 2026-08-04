@@ -369,6 +369,181 @@ namespace AETP.Modules.Process.Infrastructure.Migrations
                     b.ToTable("BusinessRules", "process");
                 });
 
+            modelBuilder.Entity("AETP.Modules.Process.Domain.DataDictionaryEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Context")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DataType")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("EngagementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Format")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("GlobalRulesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPII")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OfficialName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Owner")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("QualityOwner")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("RepresentationsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SynonymsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TechnicalName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EngagementId", "OfficialName", "Context");
+
+                    b.ToTable("DataDictionaryEntries", "process");
+                });
+
+            modelBuilder.Entity("AETP.Modules.Process.Domain.DocumentExtraction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Author")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("BlobPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("BusinessRulesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DetectedLanguage")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("DocumentCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DocumentFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("DocumentModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EngagementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EntitiesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExecutiveSummary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExtractedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExtractedDataJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExtractionError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("ExtractionModel")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ExtractionStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Subido");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("PageCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProcessId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RelationshipsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("ProcessId");
+
+                    b.HasIndex("SourceId");
+
+                    b.ToTable("DocumentExtractions", "process");
+                });
+
             modelBuilder.Entity("AETP.Modules.Process.Domain.EnterpriseSystem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -389,10 +564,31 @@ namespace AETP.Modules.Process.Infrastructure.Migrations
                     b.Property<Guid>("EngagementId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("EsSuite")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Hosting")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NotasAPI")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("NotasHosting")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ProveedorNube")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -400,6 +596,15 @@ namespace AETP.Modules.Process.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
                         .HasDefaultValue("Activo");
+
+                    b.Property<bool>("TieneAPI")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("TipoAPI")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -410,6 +615,69 @@ namespace AETP.Modules.Process.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("EnterpriseSystems", "process");
+                });
+
+            modelBuilder.Entity("AETP.Modules.Process.Domain.EnterpriseSystemModule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EngagementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("SystemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SystemId");
+
+                    b.ToTable("EnterpriseSystemModules", "process");
+                });
+
+            modelBuilder.Entity("AETP.Modules.Process.Domain.EnterpriseSystemTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EngagementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Nombre")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("SystemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SystemId");
+
+                    b.ToTable("EnterpriseSystemTransactions", "process");
                 });
 
             modelBuilder.Entity("AETP.Modules.Process.Domain.KpiDefinition", b =>
@@ -1122,6 +1390,39 @@ namespace AETP.Modules.Process.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("OwnerRoleId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("AETP.Modules.Process.Domain.DocumentExtraction", b =>
+                {
+                    b.HasOne("AETP.Modules.Process.Domain.ProcessActivity", null)
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AETP.Modules.Process.Domain.ActivityInteraction", null)
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AETP.Modules.Process.Domain.EnterpriseSystemModule", b =>
+                {
+                    b.HasOne("AETP.Modules.Process.Domain.EnterpriseSystem", null)
+                        .WithMany()
+                        .HasForeignKey("SystemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AETP.Modules.Process.Domain.EnterpriseSystemTransaction", b =>
+                {
+                    b.HasOne("AETP.Modules.Process.Domain.EnterpriseSystem", null)
+                        .WithMany()
+                        .HasForeignKey("SystemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AETP.Modules.Process.Domain.ProcessActivity", b =>

@@ -6,13 +6,18 @@ import TimelineRoundedIcon from '@mui/icons-material/TimelineRounded'
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import GavelRoundedIcon from '@mui/icons-material/GavelRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
+import DnsRoundedIcon from '@mui/icons-material/DnsRounded'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { phases, flatNavItems, StepStatus, phasePath, getPhaseStatus } from './phaseData'
+import { useDeepDiveTotals } from '@/modules/deepdive/state/deepDiveStore'
 
 const flatIcons: { [key: string]: JSX.Element } = {
   trazabilidad: <TimelineRoundedIcon fontSize="small" />,
   entregables: <DescriptionRoundedIcon fontSize="small" />,
   decisiones: <GavelRoundedIcon fontSize="small" />,
+  'diccionario-datos': <MenuBookRoundedIcon fontSize="small" />,
+  'catalogo-sistemas': <DnsRoundedIcon fontSize="small" />,
   administracion: <SettingsRoundedIcon fontSize="small" />,
 }
 
@@ -37,6 +42,11 @@ const MONO_FONT = "'IBM Plex Mono', monospace"
 export const PhaseSidebar = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  // L3 (Deep Dive de Procesos) no cuenta "pasos" a nivel de fase como L1/L2
+  // — su avance real vive en los pasos capturados por proceso (ver
+  // deepDiveStore). Se usa aquí solo para ese contador; el resto de fases
+  // sigue usando phase.steps normalmente.
+  const deepDiveTotals = useDeepDiveTotals()
 
   return (
     <Box sx={{ py: 2 }}>
@@ -59,7 +69,9 @@ export const PhaseSidebar = () => {
           const accent = levelColor(phaseIdx)
           const useAccent = status === 'current' || status === 'pending'
           const isLastPhase = phaseIdx === phases.length - 1
-          const completedCount = phase.steps.filter((s) => s.status === 'completed').length
+          const completedCount =
+            phase.id === 'h2' ? deepDiveTotals.totalCaptured : phase.steps.filter((s) => s.status === 'completed').length
+          const totalCount = phase.id === 'h2' ? deepDiveTotals.totalExpected : phase.steps.length
           const selected =
             location.pathname === phasePath(phase) || phase.steps.some((s) => s.path === location.pathname)
 
@@ -140,7 +152,7 @@ export const PhaseSidebar = () => {
                       {phase.code}
                     </Typography>
                     <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
-                      · {completedCount}/{phase.steps.length} pasos
+                      · {completedCount}/{totalCount} pasos
                     </Typography>
                   </Box>
                 </Box>

@@ -86,6 +86,56 @@ namespace AETP.Modules.ClientEngagement.Api.Storage
         }
 
         /// <summary>
+        /// Uploads the ORIGINAL unstructured source document (e.g. a PDF
+        /// credit report attached to an email) captured by a
+        /// <see cref="AETP.Modules.Process.Domain.ActivityInteraction"/>
+        /// (📥 Fuente) within a
+        /// <see cref="AETP.Modules.Process.Domain.ProcessActivity"/> (🪜
+        /// Paso) — used by
+        /// <see cref="DocumentExtractionAgent"/>/<see cref="DocumentExtractionOrchestrator"/>.
+        /// Same per-engagement container convention as <see cref="UploadAsync"/>
+        /// (container name = engagementId, the empresa/tenant), but with a
+        /// blob path that keeps the full Proceso → Paso → Fuente
+        /// traceability visible directly in the Data Lake path itself.
+        /// Throws <see cref="InvalidOperationException"/>
+        /// if storage is not configured; callers should check
+        /// <see cref="IsConfigured"/> first.
+        /// </summary>
+        public async Task<string> UploadSourceDocumentAsync(
+            Guid engagementId,
+            Guid processId,
+            Guid activityId,
+            Guid sourceId,
+            string fileName,
+            Stream content,
+            string contentType,
+            CancellationToken cancellationToken = default)
+        {
+            if (_blobServiceClient is null)
+            {
+                throw new InvalidOperationException(
+                    "Data Lake storage is not configured. Set the 'DataLakeStorage' " +
+                    "connection string application setting once credentials are provided.");
+            }
+
+            var containerClient = _blobServiceClient.GetBlobContainerClient(engagementId.ToString("D").ToLowerInvariant());
+            await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+
+            var blobPath = $"processes/{processId}/steps/{activityId}/sources/{sourceId}/{Guid.NewGuid()}-{fileName}";
+            var blobClient = containerClient.GetBlobClient(blobPath);
+
+            await blobClient.UploadAsync(
+                content,
+                new BlobUploadOptions
+                {
+                    HttpHeaders = new BlobHttpHeaders { ContentType = contentType },
+                },
+                cancellationToken);
+
+            return blobPath;
+        }
+
+        /// <summary>
         /// Uploads the original org chart image (used by
         /// <see cref="OrgChartFunctions.ExtractOrgChart"/> before AI
         /// extraction) using the same per-engagement container convention,

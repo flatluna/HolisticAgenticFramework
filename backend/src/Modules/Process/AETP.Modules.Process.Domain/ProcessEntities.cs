@@ -140,6 +140,19 @@ namespace AETP.Modules.Process.Domain
         Cliente
     }
 
+    /// <summary>Dónde corre un <see cref="EnterpriseSystem"/>: on-premises,
+    /// nube, híbrido, o aún no se sabe. Conocimiento GLOBAL del sistema
+    /// (una vez por sistema, no por proceso/paso) — insumo directo para
+    /// construir el "reference architecture" del cliente conforme se van
+    /// capturando sistemas durante el Deep Dive de Procesos.</summary>
+    public enum SystemHostingType
+    {
+        OnPremises,
+        Nube,
+        Hibrido,
+        NoSe
+    }
+
     /// <summary>
     /// A single Business Process captured during the "02. Diagnóstico y Madurez
     /// Actual" assessment (dimension 2.3 - Procesos). Each process belongs to
@@ -382,6 +395,32 @@ namespace AETP.Modules.Process.Domain
 
         public string Status { get; set; } = "Activo"; // Activo/Inactivo
 
+        /// <summary>¿Es un sistema tipo "suite" con jerarquía interna
+        /// módulo → transacción (ej. SAP, Dynamics 365, Salesforce)? Cuando
+        /// es true, la UI de captura pide módulo/transacción; cuando es
+        /// false solo pide pantalla/URL básica.</summary>
+        public bool EsSuite { get; set; }
+
+        /// <summary>"🔌 API del sistema" — ¿este sistema, EN GENERAL, expone
+        /// alguna API que un Agente de IA podría usar en vez de simular
+        /// clicks (RPA)? Conocimiento GLOBAL del sistema (se captura una
+        /// vez, se reusa en todos los procesos/pasos que lo toquen).</summary>
+        public bool TieneAPI { get; set; }
+
+        public string? TipoAPI { get; set; }
+
+        public string? NotasAPI { get; set; }
+
+        /// <summary>"☁️ Hosting del sistema" — dónde corre. Igual que
+        /// TieneAPI, es conocimiento GLOBAL del sistema — insumo directo
+        /// para construir el "reference architecture" del cliente conforme
+        /// se van capturando sistemas en los procesos.</summary>
+        public SystemHostingType? Hosting { get; set; }
+
+        public string? ProveedorNube { get; set; }
+
+        public string? NotasHosting { get; set; }
+
         public EnterpriseSystem() : base() { }
 
         public static EnterpriseSystem Create(Guid engagementId, string name)
@@ -392,6 +431,65 @@ namespace AETP.Modules.Process.Domain
                 EngagementId = engagementId,
                 Name = name,
                 Status = "Activo",
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+    }
+
+    /// <summary>
+    /// A módulo/área interna de un <see cref="EnterpriseSystem"/> tipo suite
+    /// (ej. "FI (Finanzas)" dentro de SAP). Crece en runtime conforme un
+    /// asesor captura módulos nuevos durante el Deep Dive de Procesos — es
+    /// el "mini-catálogo" que luego se sugiere en autocompletado.
+    /// </summary>
+    public class EnterpriseSystemModule : AggregateRoot
+    {
+        /// <summary>Sistema al que pertenece este módulo (FK real a EnterpriseSystem).</summary>
+        public Guid SystemId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public EnterpriseSystemModule() : base() { }
+
+        public static EnterpriseSystemModule Create(Guid engagementId, Guid systemId, string name)
+        {
+            return new EnterpriseSystemModule
+            {
+                Id = Guid.NewGuid(),
+                EngagementId = engagementId,
+                SystemId = systemId,
+                Name = name,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+    }
+
+    /// <summary>
+    /// Una transacción/pantalla conocida dentro de un <see cref="EnterpriseSystem"/>
+    /// tipo suite (ej. código "VA01" / nombre "Crear pedido de ventas" en
+    /// SAP). Igual que <see cref="EnterpriseSystemModule"/>, crece en runtime
+    /// conforme se captura durante el Deep Dive de Procesos.
+    /// </summary>
+    public class EnterpriseSystemTransaction : AggregateRoot
+    {
+        /// <summary>Sistema al que pertenece esta transacción (FK real a EnterpriseSystem).</summary>
+        public Guid SystemId { get; set; }
+
+        public string? Codigo { get; set; } // e.g. "VA01"
+
+        public string? Nombre { get; set; } // e.g. "Crear pedido de ventas"
+
+        public EnterpriseSystemTransaction() : base() { }
+
+        public static EnterpriseSystemTransaction Create(Guid engagementId, Guid systemId, string? codigo, string? nombre)
+        {
+            return new EnterpriseSystemTransaction
+            {
+                Id = Guid.NewGuid(),
+                EngagementId = engagementId,
+                SystemId = systemId,
+                Codigo = codigo,
+                Nombre = nombre,
                 CreatedAt = DateTime.UtcNow
             };
         }
@@ -1000,6 +1098,237 @@ namespace AETP.Modules.Process.Domain
                 Description = description,
                 IdentifiedBy = identifiedBy,
                 CreatedAt = DateTime.UtcNow
+            };
+        }
+    }
+
+    // =====================================================================
+    // Document Extraction Agent: 📄 Documento NO estructurado → [AGENTE] →
+    // 🗂 Datos ESTRUCTURADOS, capturado por una FUENTE (ActivityInteraction)
+    // dentro de un PASO (ProcessActivity) de un PROCESO (BusinessProcess).
+    // =====================================================================
+
+    /// <summary>Tipo de entidad reconocida (NER) dentro de un
+    /// <see cref="DocumentExtraction"/> — ver
+    /// AETP.Modules.ClientEngagement.Api.Agents.DocumentExtractionAgent.
+    /// Articulo (bien/servicio/activo mencionado) y ReglaNegocio (política,
+    /// umbral o criterio explícito, ej. "mínimo 3 cotizaciones > $50,000")
+    /// se agregaron para que documentos normativos/de proceso (políticas,
+    /// manuales, contratos) queden bien representados, no solo credit
+    /// reports/estados financieros.</summary>
+    public enum ExtractedEntityType
+    {
+        Persona,
+        Compania,
+        Fecha,
+        Monto,
+        Ubicacion,
+        Identificador,
+        Articulo,
+        ReglaNegocio
+    }
+
+    /// <summary>
+    /// Resultado de leer, con un Agente de IA, un documento NO ESTRUCTURADO
+    /// (ej. un credit report en PDF adjunto a un email) que llegó como
+    /// <see cref="ActivityInteraction"/> (📥 Fuente de información) dentro de
+    /// un <see cref="ProcessActivity"/> (🪜 Paso) de un
+    /// <see cref="BusinessProcess"/> (📂 Proceso). Este es el punto exacto
+    /// donde lo no-estructurado se vuelve estructurado y utilizable — ver
+    /// AETP.Modules.ClientEngagement.Api.Agents.DocumentExtractionAgent.
+    ///
+    /// Guarda los 6 bloques pedidos (metadatos, datos clave tipados,
+    /// entidades NER, descripción del contenido, total de páginas y
+    /// sumario ejecutivo) además de la TRAZABILIDAD completa: ProcessId
+    /// (proceso), ActivityId (paso), SourceId (fuente) y EngagementId
+    /// (empresa/tenant, heredado de <see cref="AggregateRoot"/>) — nunca se
+    /// pierde de dónde vino el documento. El PDF original vive en Data
+    /// Lake/Blob Storage, en el contenedor DE LA EMPRESA (ver
+    /// <see cref="BlobPath"/> y
+    /// AETP.Modules.ClientEngagement.Api.Storage.ProcessDocumentStorageService
+    /// .UploadSourceDocumentAsync); aquí solo se guarda el resultado
+    /// estructurado y la referencia al blob.
+    /// </summary>
+    public class DocumentExtraction : AggregateRoot
+    {
+        /// <summary>📂 Proceso al que pertenece este documento (denormalizado
+        /// desde ActivityId.ProcessId para poder consultar/filtrar
+        /// directamente sin join — mismo patrón relajado, sin FK física,
+        /// usado por <see cref="ProcessDocument.ProcessId"/>).</summary>
+        public Guid ProcessId { get; set; }
+
+        /// <summary>🪜 Paso dentro del cual llegó este documento (FK real a
+        /// ProcessActivity).</summary>
+        public Guid ActivityId { get; set; }
+
+        /// <summary>📥 Fuente de información concreta que trajo este
+        /// documento (FK real a ActivityInteraction — ej. el email con el
+        /// PDF adjunto, o el documento/ley cargado directamente).</summary>
+        public Guid SourceId { get; set; }
+
+        // -------- Archivo original --------
+        public string FileName { get; set; } = string.Empty;
+
+        public string? ContentType { get; set; }
+
+        public long FileSizeBytes { get; set; }
+
+        /// <summary>Ruta del archivo original dentro de su contenedor de
+        /// Data Lake/Blob Storage (contenedor = EngagementId, la empresa).
+        /// Null si el storage no estaba configurado al momento de la carga.</summary>
+        public string? BlobPath { get; set; }
+
+        // -------- 1️⃣ Metadatos del documento --------
+        /// <summary>Tipo/formato del archivo (ej. "pdf").</summary>
+        public string? DocumentFormat { get; set; }
+
+        /// <summary>Fecha de creación del archivo, si el archivo la trae
+        /// (ej. propiedades del PDF).</summary>
+        public DateTime? DocumentCreatedAt { get; set; }
+
+        /// <summary>Fecha de última modificación del archivo, si el archivo
+        /// la trae.</summary>
+        public DateTime? DocumentModifiedAt { get; set; }
+
+        /// <summary>Autor, de las propiedades del PDF, si existe.</summary>
+        public string? Author { get; set; }
+
+        /// <summary>Idioma detectado del contenido (ej. "Español").</summary>
+        public string? DetectedLanguage { get; set; }
+
+        // -------- 2️⃣ Datos extraídos (pares clave-valor tipados) --------
+        /// <summary>JSON de List&lt;ExtractedDataPoint&gt; — ver
+        /// AETP.Modules.ClientEngagement.Api.Agents.DocumentExtractionAgent.</summary>
+        public string? ExtractedDataJson { get; set; }
+
+        // -------- 3️⃣ Entidades (NER) --------
+        /// <summary>JSON de List&lt;ExtractedEntity&gt; — ver
+        /// AETP.Modules.ClientEngagement.Api.Agents.DocumentExtractionAgent.</summary>
+        public string? EntitiesJson { get; set; }
+
+        /// <summary>JSON de List&lt;BusinessRule&gt; — reglas de negocio
+        /// explícitas del documento (políticas, umbrales, criterios de
+        /// autorización, ej. "Compras &gt; $50,000 MXN requieren mínimo 3
+        /// cotizaciones"), cada una con un nombre corto y su descripción
+        /// completa — ver
+        /// AETP.Modules.ClientEngagement.Api.Agents.DocumentExtractionAgent.</summary>
+        public string? BusinessRulesJson { get; set; }
+
+        /// <summary>JSON de List&lt;ExtractedRelationship&gt; — el "grafo" del
+        /// documento: cómo se conectan entre sí las entidades de
+        /// <see cref="EntitiesJson"/> y las reglas de
+        /// <see cref="BusinessRulesJson"/> (ej. una Persona AUTORIZA una
+        /// ReglaNegocio, una ReglaNegocio APLICA_A un Articulo/Monto) — ver
+        /// AETP.Modules.ClientEngagement.Api.Agents.DocumentExtractionAgent.</summary>
+        public string? RelationshipsJson { get; set; }
+
+        // -------- 4️⃣ Descripción del contenido --------
+        /// <summary>Qué es el documento y de qué trata, en lenguaje natural.</summary>
+        public string? ContentDescription { get; set; }
+
+        // -------- 5️⃣ Total de páginas --------
+        public int PageCount { get; set; }
+
+        // -------- 6️⃣ Sumario ejecutivo --------
+        public string? ExecutiveSummary { get; set; }
+
+        /// <summary>Subido, Procesando, Procesado or Error.</summary>
+        public string ExtractionStatus { get; set; } = "Subido";
+
+        public string? ExtractionError { get; set; }
+
+        /// <summary>Cuándo terminó la extracción (distinto de CreatedAt, que
+        /// es cuándo se subió el archivo) — timestamp de extracción pedido
+        /// por la trazabilidad.</summary>
+        public DateTime? ExtractedAt { get; set; }
+
+        /// <summary>Modelo/deployment de IA usado para la extracción
+        /// (auditoría).</summary>
+        public string? ExtractionModel { get; set; }
+
+        public DocumentExtraction() : base() { }
+
+        public static DocumentExtraction Create(
+            Guid engagementId, Guid processId, Guid activityId, Guid sourceId, string fileName)
+        {
+            return new DocumentExtraction
+            {
+                Id = Guid.NewGuid(),
+                EngagementId = engagementId,
+                ProcessId = processId,
+                ActivityId = activityId,
+                SourceId = sourceId,
+                FileName = fileName,
+                ExtractionStatus = "Subido",
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+    }
+
+    /// <summary>
+    /// UN dato canónico del "📚 Diccionario de Datos del Negocio" — fuente
+    /// única de verdad de la taxonomía de datos de la empresa, GLOBAL por
+    /// engagement (no vive dentro de un proceso/paso concreto, aunque cada
+    /// dato pueda traer un <see cref="Context"/> — ej. el nombre de un
+    /// proceso/paso — para distinguir nombres genéricos ambiguos como
+    /// "Status" que significan cosas distintas según de dónde vengan).
+    /// Referenciado desde el frontend vía StepDataItem.dictionaryId (FK
+    /// lógica, no física — mismo patrón relajado usado en todo el dominio).
+    /// Los sinónimos/representaciones en sistemas/reglas globales se
+    /// guardan como JSON (mismo patrón que <see cref="DocumentExtraction"/>)
+    /// en vez de tablas hijas, porque el frontend siempre los edita/guarda
+    /// como UN solo formulario (ver DataDictionaryEntryDialog.tsx) — nunca
+    /// se agregan uno a uno como los módulos/transacciones de
+    /// <see cref="EnterpriseSystem"/>.
+    /// </summary>
+    public class DataDictionaryEntry : AggregateRoot
+    {
+        public string OfficialName { get; set; } = string.Empty;
+
+        public string? Context { get; set; }
+
+        public string? Description { get; set; }
+
+        public string? TechnicalName { get; set; }
+
+        /// <summary>"texto"/"numero"/"fecha"/"booleano"/"identificador"/
+        /// "monto"/"documento"/"otro" — mismo union que CanonicalDataType en
+        /// el frontend.</summary>
+        public string? DataType { get; set; }
+
+        public string? Format { get; set; }
+
+        public bool IsPII { get; set; }
+
+        public string? Owner { get; set; }
+
+        public string? QualityOwner { get; set; }
+
+        /// <summary>JSON de string[] — ver CanonicalDataEntry.synonyms.</summary>
+        public string? SynonymsJson { get; set; }
+
+        /// <summary>JSON de DataRepresentation[] (id/system/fieldName/
+        /// screenOrTable) — ver CanonicalDataEntry.representations.</summary>
+        public string? RepresentationsJson { get; set; }
+
+        /// <summary>JSON de BusinessRule[] — ver CanonicalDataEntry.globalRules.</summary>
+        public string? GlobalRulesJson { get; set; }
+
+        public DataDictionaryEntry() : base() { }
+
+        /// <summary>Crea la entidad con un Id DICTADO POR EL CLIENTE — el
+        /// frontend genera el id (GUID) apenas crea el borrador en memoria
+        /// (para poder referenciarlo de inmediato desde StepDataItem.dictionaryId
+        /// antes de guardar) y lo manda tal cual en el upsert; este método
+        /// solo se llama la primera vez que ese id no existe todavía.</summary>
+        public static DataDictionaryEntry Create(Guid engagementId, Guid id, string officialName)
+        {
+            return new DataDictionaryEntry
+            {
+                Id = id,
+                EngagementId = engagementId,
+                OfficialName = officialName,
+                CreatedAt = DateTime.UtcNow,
             };
         }
     }
